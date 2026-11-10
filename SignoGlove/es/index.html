@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SignoGlove: tus gestos, convertidos en voz</title>
+  <meta name="description" content="SignoGlove es un guante con micro:bit que convierte la posición de la mano en frases habladas.">
+  <link rel="alternate" hreflang="en" href="../en/index.html">
+  <link rel="icon" type="image/png" href="../assets/img/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+  <link rel="stylesheet" href="../assets/css/styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#contenido">Saltar al contenido</a>
+
+  <header class="site-header">
+    <div class="wrap">
+      <a class="brand" href="index.html">
+        <img src="../assets/img/logo.png" alt="" width="40" height="40">
+        SignoGlove
+      </a>
+      <nav class="site-nav" aria-label="Principal">
+        <a href="index.html" aria-current="page">Inicio</a>
+        <a href="about.html">Sobre el proyecto</a>
+        <a href="donate.html">Donaciones</a>
+        <a href="team.html">Integrantes</a>
+        <a class="lang" href="../en/index.html" hreflang="en" lang="en">English</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="contenido">
+    <section class="hero">
+      <div class="wrap">
+        <div>
+          <h1>Tus gestos, convertidos en voz</h1>
+          <p>SignoGlove es un guante con una placa micro:bit. Según la posición de tu mano, esta página muestra una frase y la dice en voz alta.</p>
+          <div class="hero-actions">
+            <button id="connect" class="btn" type="button">Conectar guante</button>
+            <p id="status" class="status" role="status" aria-live="polite"></p>
+          </div>
+          <p class="note">Funciona en Chrome o Edge, en computador o Android, con el Bluetooth encendido.</p>
+
+          <div id="warning" class="alert" role="alert" hidden>
+            <strong id="warning-text"></strong>
+          </div>
+          <div id="error" class="alert alert-error" role="alert" hidden>
+            <strong id="error-title"></strong>
+            <p id="error-hint"></p>
+            <p><code id="error-detail"></code></p>
+          </div>
+        </div>
+        <div class="hero-media">
+          <img src="../assets/img/guante-signoglove.webp" alt="Niña con el guante rojo de SignoGlove en la mano levantada" width="900" height="900">
+        </div>
+      </div>
+    </section>
+
+    <section class="talk" aria-labelledby="frases-titulo">
+      <div class="wrap">
+        <h2 id="frases-titulo" class="section-title">Frases</h2>
+        <p class="section-intro">Elige un tema. Con el guante conectado, cada posición de la mano dice una de estas cinco frases. También puedes tocarlas para escucharlas.</p>
+        <div id="topics" class="topics" role="group" aria-label="Temas"></div>
+        <div class="bubble">
+          <p id="phrase-display" class="phrase-display" aria-live="polite"></p>
+        </div>
+        <div id="phrase-grid" class="phrase-grid" role="group" aria-label="Frases del tema"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>SignoGlove: un guante hecho con micro:bit y Web Bluetooth.</p>
+    </div>
+  </footer>
+
+  <script src="../assets/js/main.js"></script>
+  <script src="../assets/js/data/es.js"></script>
+  <script src="../assets/js/glove.js"></script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SignoGlove</title>
+  <meta name="description" content="SignoGlove es un guante con micro:bit que convierte la posición de la mano en frases habladas.">
+  <link rel="icon" type="image/png" href="assets/img/logo.png">
+  <script>
+    // Abre la versión en inglés si el navegador está en inglés; si no, la versión en español.
+    var lang = (navigator.language || 'es').toLowerCase();
+    location.replace(lang.indexOf('en') === 0 ? 'en/index.html' : 'es/index.html');
+  </script>
+  <noscript><meta http-equiv="refresh" content="0; url=es/index.html"></noscript>
+</head>
+<body>
+  <p><a href="es/index.html">Español</a> · <a href="en/index.html" lang="en">English</a></p>
+</body>
+</html>
