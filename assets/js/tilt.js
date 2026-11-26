@@ -17,8 +17,9 @@
     // 'beta' = eje X (inclinar hacia adelante o hacia atrás), como la micro:bit.
     // 'gamma' = eje Y (inclinar hacia los lados).
     axis: 'beta',
-    // true si el ángulo sale con el signo al revés en tu montaje.
-    invert: false,
+    // true invierte el sentido del eje (los ángulos positivos pasan a ser negativos).
+    // También se puede cambiar en la página «Calibrar».
+    invert: true,
     // Tiempo (ms) que la mano debe quedarse en una posición antes de hablar.
     holdMs: 400,
     // Un rango por frase, en orden (frase 1 a 5). Gana el primero que coincida.
