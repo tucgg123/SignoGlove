@@ -11,7 +11,7 @@ Página web que usa el **sensor de movimiento del celular** (giroscopio y aceler
 ## Cómo funciona
 
 1. Abres la página en el celular y tocas **Activar sensor** (en iPhone hay que tocar **Permitir**).
-2. La página lee la orientación del celular (`DeviceOrientationEvent`) y calcula la inclinación lateral (*roll*), igual que la micro:bit: **0°** con la pantalla hacia arriba, valores **positivos** al inclinar a la derecha y **±180°** boca abajo. El ángulo se ve en vivo debajo del botón.
+2. La página lee la orientación del celular (`DeviceOrientationEvent`) y usa solo el giro sobre el **eje X** (inclinar hacia adelante o hacia atrás), igual que la micro:bit: **0°** con la pantalla hacia arriba, valores **positivos** cuando sube la parte de arriba del celular y **±180°** boca abajo. Inclinar hacia los lados no cambia nada. El ángulo se ve en vivo debajo del botón.
 3. Si la mano se queda unos 0,4 s dentro de un rango, la frase aparece en pantalla y se reproduce su audio.
 
 | Inclinación recibida | Frase del tema |

@@ -7,9 +7,10 @@
  * Flujo:
  * 1. La persona abre esta página en el celular y toca «Activar sensor».
  * 2. El navegador entrega la orientación del celular (giroscopio y acelerómetro).
- * 3. Con ella se calcula la inclinación lateral (roll), igual que hacía la micro:bit:
+ * 3. Se usa solo el giro sobre el eje X (inclinar hacia adelante o hacia atrás),
+ *    igual que hacía la micro:bit. Ese ángulo se llama «beta» en el navegador:
  *    0° = celular plano con la pantalla hacia arriba,
- *    positivo = se inclina hacia la derecha, ±180° = boca abajo.
+ *    positivo = la parte de arriba del celular sube, ±180° = boca abajo.
  * 4. Ese ángulo se convierte en una de las 5 frases del tema elegido,
  *    que se muestra en pantalla y se reproduce en voz alta.
  */
@@ -34,7 +35,7 @@
   ];
 
   // Cambia a true si en tu montaje el ángulo sale con el signo al revés
-  // (por ejemplo, si al inclinar a la derecha ves valores negativos).
+  // (por ejemplo, si al subir la parte de arriba del celular ves valores negativos).
   const INVERT_DIRECTION = false;
 
   // Tiempo (ms) que la mano debe quedarse en una posición antes de hablar.
@@ -180,16 +181,11 @@
   /* ---------- Sensor del celular ---------- */
 
   /**
-   * Calcula la inclinación lateral (roll) a partir de los ángulos que da el
-   * navegador: beta (adelante/atrás, −180 a 180) y gamma (izquierda/derecha,
-   * −90 a 90). Gamma por sí solo no llega a 180°, así que se combinan los dos
-   * para obtener un ángulo de −180 a 180, como el de la micro:bit.
+   * Inclinación sobre el eje X, de −180 a 180, como la de la micro:bit.
+   * Es el ángulo beta del navegador; los otros ejes no se tienen en cuenta.
    */
-  function rollFromOrientation(beta, gamma) {
-    const b = beta * Math.PI / 180;
-    const g = gamma * Math.PI / 180;
-    const roll = Math.atan2(Math.cos(b) * Math.sin(g), Math.cos(b) * Math.cos(g)) * 180 / Math.PI;
-    return INVERT_DIRECTION ? -roll : roll;
+  function tiltFromOrientation(beta) {
+    return INVERT_DIRECTION ? -beta : beta;
   }
 
   function phraseFromTilt(angle) {
@@ -198,7 +194,7 @@
   }
 
   function handleOrientation(event) {
-    if (!active || !Number.isFinite(event.beta) || !Number.isFinite(event.gamma)) return;
+    if (!active || !Number.isFinite(event.beta)) return;
 
     if (!gotSensorData) {
       gotSensorData = true;
@@ -206,7 +202,7 @@
       setStatus(config.ui.connected, 'ok');
     }
 
-    const angle = Math.round(rollFromOrientation(event.beta, event.gamma));
+    const angle = Math.round(tiltFromOrientation(event.beta));
     const now = performance.now();
 
     if (now - lastAngleUpdate > 120) {
