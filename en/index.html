@@ -23,6 +23,7 @@
       </a>
       <nav class="site-nav" aria-label="Main">
         <a href="index.html" aria-current="page">Home</a>
+        <a href="calibrate.html">Calibrate</a>
         <a href="about.html">About</a>
         <a href="donate.html">Donate</a>
         <a href="team.html">Team</a>
@@ -42,7 +43,8 @@
             <p id="status" class="status" role="status" aria-live="polite"></p>
             <p id="angle" class="angle"></p>
           </div>
-          <p class="note">Open this page on your phone (Chrome on Android or Safari on iPhone). Tip: lock screen rotation so the layout doesn’t flip as you turn your hand.</p>
+          <p class="note">Open this page on your phone (Chrome on Android or Safari on iPhone). Tip: lock screen rotation so the layout doesn’t flip as you turn your hand. Is a position uncomfortable? <a href="calibrate.html">Calibrate the sensor</a>.</p>
+          <p id="calibration-note" class="note" hidden>You’re using your own calibration. <a href="calibrate.html">Change it</a></p>
 
           <div id="warning" class="alert" role="alert" hidden>
             <strong id="warning-text"></strong>
@@ -80,6 +82,7 @@
 
   <script src="../assets/js/main.js"></script>
   <script src="../assets/js/data/en.js"></script>
+  <script src="../assets/js/tilt.js"></script>
   <script src="../assets/js/glove.js"></script>
 </body>
 </html>
