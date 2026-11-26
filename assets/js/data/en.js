@@ -1,20 +1,26 @@
 /**
  * Phrases and interface text in English.
  * Each topic has 5 phrases: order matters, because each position
- * maps to a glove tilt range (see glove.js).
+ * maps to a phone tilt range (see glove.js).
  */
 window.SIGNOGLOVE = {
   audioPath: '../assets/audio/en/',
 
   ui: {
-    connect: 'Connect glove',
-    connecting: 'Connecting…',
-    connected: 'Glove connected',
-    reconnecting: 'Connection lost. Reconnecting…',
-    unsupported: 'This browser can’t use Bluetooth. Open the page in Chrome or Edge on a computer or an Android phone.',
-    errorTitle: 'The glove couldn’t connect.',
-    errorHint: 'Make sure the micro:bit is on and nearby, then try again.',
-    placeholder: 'Connect the glove or tap a phrase to hear it.'
+    connect: 'Start sensor',
+    connecting: 'Starting…',
+    stop: 'Pause sensor',
+    waiting: 'Waiting for the sensor…',
+    connected: 'Sensor on: move your hand',
+    angle: 'Tilt',
+    rangeJoin: 'to',
+    unsupported: 'This browser can’t read the motion sensor. Open the page in Chrome (Android) or Safari (iPhone).',
+    insecure: 'The sensor only works when the page is opened over https (for example, from GitHub Pages).',
+    noSensor: 'No sensor data is coming in. Open this page on a phone or tablet with a gyroscope.',
+    denied: 'Permission to use the motion sensor was not given. Reload the page and tap “Allow”.',
+    errorTitle: 'The sensor couldn’t start.',
+    errorHint: 'Reload the page and try again.',
+    placeholder: 'Start the sensor or tap a phrase to hear it.'
   },
 
   topics: [

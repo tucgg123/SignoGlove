@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>SignoGlove: tus gestos, convertidos en voz</title>
-  <meta name="description" content="SignoGlove es un guante con micro:bit que convierte la posición de la mano en frases habladas.">
+  <meta name="description" content="SignoGlove usa el sensor de movimiento del celular para convertir la posición de la mano en frases habladas.">
   <link rel="alternate" hreflang="en" href="../en/index.html">
   <link rel="icon" type="image/png" href="../assets/img/logo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -36,12 +36,13 @@
       <div class="wrap">
         <div>
           <h1>Tus gestos, convertidos en voz</h1>
-          <p>SignoGlove es un guante con una placa micro:bit. Según la posición de tu mano, esta página muestra una frase y la dice en voz alta.</p>
+          <p>Pon el celular en el dorso de la mano o en el guante, con la pantalla hacia arriba. Según cómo inclines la mano, esta página muestra una frase y la dice en voz alta.</p>
           <div class="hero-actions">
-            <button id="connect" class="btn" type="button">Conectar guante</button>
+            <button id="connect" class="btn" type="button">Activar sensor</button>
             <p id="status" class="status" role="status" aria-live="polite"></p>
+            <p id="angle" class="angle"></p>
           </div>
-          <p class="note">Funciona en Chrome o Edge, en computador o Android, con el Bluetooth encendido.</p>
+          <p class="note">Abre esta página en el celular (Chrome en Android o Safari en iPhone). Consejo: bloquea la rotación de pantalla para que no cambie al girar la mano.</p>
 
           <div id="warning" class="alert" role="alert" hidden>
             <strong id="warning-text"></strong>
@@ -61,7 +62,7 @@
     <section class="talk" aria-labelledby="frases-titulo">
       <div class="wrap">
         <h2 id="frases-titulo" class="section-title">Frases</h2>
-        <p class="section-intro">Elige un tema. Con el guante conectado, cada posición de la mano dice una de estas cinco frases. También puedes tocarlas para escucharlas.</p>
+        <p class="section-intro">Elige un tema. Con el sensor activo, cada inclinación de la mano dice una de estas cinco frases (debajo de cada una ves su rango). También puedes tocarlas para escucharlas.</p>
         <div id="topics" class="topics" role="group" aria-label="Temas"></div>
         <div class="bubble">
           <p id="phrase-display" class="phrase-display" aria-live="polite"></p>
@@ -73,7 +74,7 @@
 
   <footer class="site-footer">
     <div class="wrap">
-      <p>SignoGlove: un guante hecho con micro:bit y Web Bluetooth.</p>
+      <p>SignoGlove: funciona con el sensor de movimiento de tu celular.</p>
     </div>
   </footer>
 
