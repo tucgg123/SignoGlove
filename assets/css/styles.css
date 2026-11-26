@@ -150,6 +150,11 @@ button { font: inherit; }
 .status[data-state="ok"]::before { background: var(--ok); }
 .status[data-state="busy"]::before { background: var(--red); }
 
+/* Ángulo en vivo que mide el celular */
+.angle { margin: 0; font-weight: 700; font-variant-numeric: tabular-nums; }
+.hero .angle { margin: 0; font-size: 18px; }
+.angle:empty { display: none; }
+
 /* ---------- Avisos ---------- */
 .alert {
   margin-top: 24px;
@@ -229,6 +234,8 @@ button { font: inherit; }
   font-weight: 700;
   cursor: pointer;
 }
+.phrase { display: flex; flex-direction: column; gap: 4px; }
+.phrase-range { font-size: 14px; font-weight: 400; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
 .phrase:hover { border-color: var(--ink); }
 .phrase[aria-pressed="true"] { background: var(--yellow); border-color: var(--ink); }
 

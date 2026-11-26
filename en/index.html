@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>SignoGlove: your gestures, turned into speech</title>
-  <meta name="description" content="SignoGlove is a micro:bit glove that turns hand positions into spoken phrases.">
+  <meta name="description" content="SignoGlove uses your phone’s motion sensor to turn hand positions into spoken phrases.">
   <link rel="alternate" hreflang="es" href="../es/index.html">
   <link rel="icon" type="image/png" href="../assets/img/logo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -36,12 +36,13 @@
       <div class="wrap">
         <div>
           <h1>Your gestures, turned into speech</h1>
-          <p>SignoGlove is a glove with a micro:bit board. Depending on the position of your hand, this page shows a phrase and says it out loud.</p>
+          <p>Place your phone on the back of your hand or on the glove, screen facing up. Depending on how you tilt your hand, this page shows a phrase and says it out loud.</p>
           <div class="hero-actions">
-            <button id="connect" class="btn" type="button">Connect glove</button>
+            <button id="connect" class="btn" type="button">Start sensor</button>
             <p id="status" class="status" role="status" aria-live="polite"></p>
+            <p id="angle" class="angle"></p>
           </div>
-          <p class="note">Works in Chrome or Edge on a computer or Android phone, with Bluetooth turned on.</p>
+          <p class="note">Open this page on your phone (Chrome on Android or Safari on iPhone). Tip: lock screen rotation so the layout doesn’t flip as you turn your hand.</p>
 
           <div id="warning" class="alert" role="alert" hidden>
             <strong id="warning-text"></strong>
@@ -61,7 +62,7 @@
     <section class="talk" aria-labelledby="frases-titulo">
       <div class="wrap">
         <h2 id="frases-titulo" class="section-title">Phrases</h2>
-        <p class="section-intro">Pick a topic. With the glove connected, each hand position says one of these five phrases. You can also tap them to hear them.</p>
+        <p class="section-intro">Pick a topic. With the sensor on, each hand tilt says one of these five phrases (the range is shown under each one). You can also tap them to hear them.</p>
         <div id="topics" class="topics" role="group" aria-label="Topics"></div>
         <div class="bubble">
           <p id="phrase-display" class="phrase-display" aria-live="polite"></p>
@@ -73,7 +74,7 @@
 
   <footer class="site-footer">
     <div class="wrap">
-      <p>SignoGlove: a glove built with micro:bit and Web Bluetooth.</p>
+      <p>SignoGlove: powered by your phone’s motion sensor.</p>
     </div>
   </footer>
 

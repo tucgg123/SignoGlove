@@ -1,20 +1,26 @@
 /**
  * Frases y textos de la interfaz en español.
  * Cada tema tiene 5 frases: el orden importa, porque cada posición
- * corresponde a un rango de inclinación del guante (ver glove.js).
+ * corresponde a un rango de inclinación del celular (ver glove.js).
  */
 window.SIGNOGLOVE = {
   audioPath: '../assets/audio/es/',
 
   ui: {
-    connect: 'Conectar guante',
-    connecting: 'Conectando…',
-    connected: 'Guante conectado',
-    reconnecting: 'Se perdió la conexión. Reconectando…',
-    unsupported: 'Este navegador no puede usar Bluetooth. Abre la página en Chrome o Edge en un computador o un celular Android.',
-    errorTitle: 'No se pudo conectar el guante.',
-    errorHint: 'Revisa que la micro:bit esté encendida y cerca, y vuelve a intentarlo.',
-    placeholder: 'Conecta el guante o toca una frase para escucharla.'
+    connect: 'Activar sensor',
+    connecting: 'Activando…',
+    stop: 'Pausar sensor',
+    waiting: 'Esperando el sensor…',
+    connected: 'Sensor activo: mueve la mano',
+    angle: 'Inclinación',
+    rangeJoin: 'a',
+    unsupported: 'Este navegador no puede leer el sensor de movimiento. Abre la página en Chrome (Android) o Safari (iPhone).',
+    insecure: 'El sensor solo funciona si la página se abre con https (por ejemplo, desde GitHub Pages).',
+    noSensor: 'No llegan datos del sensor. Abre esta página en un celular o tableta con giroscopio.',
+    denied: 'No diste permiso para usar el sensor de movimiento. Recarga la página y toca «Permitir».',
+    errorTitle: 'No se pudo activar el sensor.',
+    errorHint: 'Recarga la página y vuelve a intentarlo.',
+    placeholder: 'Activa el sensor o toca una frase para escucharla.'
   },
 
   topics: [

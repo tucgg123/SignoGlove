@@ -5,9 +5,12 @@
  * (assets/js/data/es.js o assets/js/data/en.js), que crea window.SIGNOGLOVE.
  *
  * Flujo:
- * 1. La persona conecta el guante (micro:bit) por Web Bluetooth.
- * 2. La micro:bit envía un número (inclinación de la mano) como texto.
- * 3. Ese número se convierte en una de las 5 frases del tema elegido,
+ * 1. La persona abre esta página en el celular y toca «Activar sensor».
+ * 2. El navegador entrega la orientación del celular (giroscopio y acelerómetro).
+ * 3. Con ella se calcula la inclinación lateral (roll), igual que hacía la micro:bit:
+ *    0° = celular plano con la pantalla hacia arriba,
+ *    positivo = se inclina hacia la derecha, ±180° = boca abajo.
+ * 4. Ese ángulo se convierte en una de las 5 frases del tema elegido,
  *    que se muestra en pantalla y se reproduce en voz alta.
  */
 (function () {
@@ -19,13 +22,9 @@
     return;
   }
 
-  // Servicio UART de la micro:bit (Nordic UART Service).
-  const SERVICE_UUID = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
-  const CHARACTERISTIC_UUID = '6e400002-b5a3-f393-e0a9-e50e24dcca9e';
-
   // Rangos de inclinación → posición de la frase (0 a 4).
   // Se revisan en este orden y gana el primero que coincida,
-  // igual que en la versión original del proyecto.
+  // igual que en la versión original con la micro:bit.
   const TILT_RANGES = [
     { min: -25, max: 35, phrase: 0 },
     { min: 35, max: 75, phrase: 1 },
@@ -34,10 +33,23 @@
     { min: 150, max: 180, phrase: 4 }
   ];
 
+  // Cambia a true si en tu montaje el ángulo sale con el signo al revés
+  // (por ejemplo, si al inclinar a la derecha ves valores negativos).
+  const INVERT_DIRECTION = false;
+
+  // Tiempo (ms) que la mano debe quedarse en una posición antes de hablar.
+  // Evita que la frase salte cuando el ángulo está justo en el borde de un rango.
+  const HOLD_MS = 400;
+
+  // Si en este tiempo (ms) no llega ningún dato, el equipo no tiene sensor.
+  const SENSOR_TIMEOUT_MS = 2000;
+
   // Elementos de la página
   const connectButton = document.getElementById('connect');
   const statusText = document.getElementById('status');
+  const angleText = document.getElementById('angle');
   const warningBox = document.getElementById('warning');
+  const warningText = document.getElementById('warning-text');
   const errorBox = document.getElementById('error');
   const errorDetail = document.getElementById('error-detail');
   const topicsBlock = document.getElementById('topics');
@@ -46,31 +58,43 @@
 
   // Estado
   let currentTopic = 0;
-  let currentPhrase = null; // { text, audio } que se está mostrando
-  let device = null;
-  let characteristic = null;
-  let currentAudio = null;
-  const audioCache = new Map();
+  let currentPhrase = null;   // { text, audio } que se está mostrando
+  let active = false;         // ¿el sensor está encendido?
+  let gotSensorData = false;
+  let sensorTimer = null;
+  let candidate = null;       // frase que se está «sosteniendo»
+  let candidateSince = 0;
+  let lastAngleUpdate = 0;
+  let wakeLock = null;
 
   /* ---------- Audio ---------- */
 
-  function getAudio(fileName) {
-    if (!audioCache.has(fileName)) {
-      audioCache.set(fileName, new Audio(config.audioPath + fileName));
-    }
-    return audioCache.get(fileName);
-  }
+  // Un solo elemento de audio: en iPhone hay que «desbloquearlo» con un toque
+  // de la persona; después ya puede sonar cuando cambia la inclinación.
+  const audio = new Audio();
+  audio.preload = 'auto';
 
   function play(phrase) {
-    if (currentAudio) {
-      currentAudio.pause();
-      currentAudio.currentTime = 0;
-    }
-    currentAudio = getAudio(phrase.audio);
-    currentAudio.play().catch((error) => {
+    audio.pause();
+    audio.src = config.audioPath + phrase.audio;
+    audio.play().catch((error) => {
       // El navegador puede bloquear el audio si no hubo interacción previa.
       console.warn('No se pudo reproducir el audio:', error.message);
     });
+  }
+
+  async function unlockAudio() {
+    try {
+      audio.muted = true;
+      audio.src = config.audioPath + config.topics[0].phrases[0].audio;
+      await audio.play();
+      audio.pause();
+      audio.currentTime = 0;
+    } catch (error) {
+      console.warn('No se pudo preparar el audio:', error.message);
+    } finally {
+      audio.muted = false;
+    }
   }
 
   /* ---------- Interfaz ---------- */
@@ -96,6 +120,7 @@
       button.setAttribute('aria-pressed', String(index === currentTopic));
       button.addEventListener('click', () => {
         currentTopic = index;
+        candidate = null;
         Array.from(topicsBlock.children).forEach((item, i) => {
           item.setAttribute('aria-pressed', String(i === currentTopic));
         });
@@ -105,14 +130,32 @@
     });
   }
 
+  function formatDegrees(value) {
+    // Usa el signo menos tipográfico (−) para que se lea mejor.
+    return String(value).replace('-', '−') + '°';
+  }
+
+  function rangeLabel(index) {
+    const range = TILT_RANGES.find((r) => r.phrase === index);
+    if (!range) return '';
+    return formatDegrees(range.min) + ' ' + config.ui.rangeJoin + ' ' + formatDegrees(range.max);
+  }
+
   function renderPhrases() {
     phraseGrid.replaceChildren();
-    config.topics[currentTopic].phrases.forEach((phrase) => {
+    config.topics[currentTopic].phrases.forEach((phrase, index) => {
       const button = document.createElement('button');
       button.type = 'button';
       button.className = 'phrase';
       button.dataset.text = phrase.text;
-      button.textContent = phrase.text;
+
+      const label = document.createElement('span');
+      label.textContent = phrase.text;
+      const range = document.createElement('span');
+      range.className = 'phrase-range';
+      range.textContent = rangeLabel(index);
+      button.append(label, range);
+
       button.setAttribute('aria-pressed', String(currentPhrase !== null && currentPhrase.text === phrase.text));
       button.addEventListener('click', () => showPhrase(phrase));
       phraseGrid.append(button);
@@ -124,102 +167,165 @@
     statusText.dataset.state = state || '';
   }
 
+  function showWarning(message) {
+    warningText.textContent = message;
+    warningBox.hidden = false;
+  }
+
   function showError(message) {
     errorDetail.textContent = message;
     errorBox.hidden = false;
   }
 
-  function resetConnectButton() {
-    connectButton.hidden = false;
-    connectButton.disabled = false;
-    connectButton.textContent = config.ui.connect;
+  /* ---------- Sensor del celular ---------- */
+
+  /**
+   * Calcula la inclinación lateral (roll) a partir de los ángulos que da el
+   * navegador: beta (adelante/atrás, −180 a 180) y gamma (izquierda/derecha,
+   * −90 a 90). Gamma por sí solo no llega a 180°, así que se combinan los dos
+   * para obtener un ángulo de −180 a 180, como el de la micro:bit.
+   */
+  function rollFromOrientation(beta, gamma) {
+    const b = beta * Math.PI / 180;
+    const g = gamma * Math.PI / 180;
+    const roll = Math.atan2(Math.cos(b) * Math.sin(g), Math.cos(b) * Math.cos(g)) * 180 / Math.PI;
+    return INVERT_DIRECTION ? -roll : roll;
   }
 
-  /* ---------- Bluetooth ---------- */
-
-  function phraseFromTilt(value) {
-    const number = Number(value);
-    if (Number.isNaN(number)) return null;
-    const range = TILT_RANGES.find((r) => number >= r.min && number <= r.max);
+  function phraseFromTilt(angle) {
+    const range = TILT_RANGES.find((r) => angle >= r.min && angle <= r.max);
     return range ? config.topics[currentTopic].phrases[range.phrase] : null;
   }
 
-  function handleGloveData(event) {
-    const view = event.target.value;
-    let text = '';
-    for (let i = 0; i < view.byteLength; i++) {
-      text += String.fromCharCode(view.getUint8(i));
+  function handleOrientation(event) {
+    if (!active || !Number.isFinite(event.beta) || !Number.isFinite(event.gamma)) return;
+
+    if (!gotSensorData) {
+      gotSensorData = true;
+      clearTimeout(sensorTimer);
+      setStatus(config.ui.connected, 'ok');
     }
 
-    const phrase = phraseFromTilt(text.trim());
-    // Solo se habla cuando la frase cambia, para no repetirla sin parar.
-    if (phrase && (!currentPhrase || phrase.text !== currentPhrase.text)) {
+    const angle = Math.round(rollFromOrientation(event.beta, event.gamma));
+    const now = performance.now();
+
+    if (now - lastAngleUpdate > 120) {
+      angleText.textContent = config.ui.angle + ': ' + formatDegrees(angle);
+      lastAngleUpdate = now;
+    }
+
+    const phrase = phraseFromTilt(angle);
+    if (!phrase) {
+      // Fuera de todos los rangos: se mantiene la última frase.
+      candidate = null;
+      return;
+    }
+    if (!candidate || candidate.text !== phrase.text) {
+      candidate = phrase;
+      candidateSince = now;
+      return;
+    }
+    // Solo se habla cuando la frase cambia y la mano se quedó quieta un momento.
+    if (now - candidateSince >= HOLD_MS && (!currentPhrase || phrase.text !== currentPhrase.text)) {
       showPhrase(phrase);
     }
   }
 
-  async function connect() {
-    const server = await device.gatt.connect();
-    const service = await server.getPrimaryService(SERVICE_UUID);
-
-    if (characteristic) {
-      characteristic.removeEventListener('characteristicvaluechanged', handleGloveData);
+  async function requestWakeLock() {
+    // Mantiene la pantalla encendida mientras se usa (si el navegador lo permite).
+    if (!('wakeLock' in navigator) || wakeLock) return;
+    try {
+      wakeLock = await navigator.wakeLock.request('screen');
+      wakeLock.addEventListener('release', () => { wakeLock = null; });
+    } catch (error) {
+      console.warn('No se pudo mantener la pantalla encendida:', error.message);
     }
-    characteristic = await service.getCharacteristic(CHARACTERISTIC_UUID);
-    characteristic.addEventListener('characteristicvaluechanged', handleGloveData);
-    await characteristic.startNotifications();
   }
 
-  async function handleDisconnect() {
-    setStatus(config.ui.reconnecting, 'busy');
+  function stop() {
+    active = false;
+    clearTimeout(sensorTimer);
+    window.removeEventListener('deviceorientation', handleOrientation);
+    if (wakeLock) wakeLock.release().catch(() => {});
+    connectButton.textContent = config.ui.connect;
+    connectButton.disabled = false;
+    angleText.textContent = '';
+    setStatus('', '');
+  }
+
+  async function start() {
+    warningBox.hidden = true;
+    errorBox.hidden = true;
+
+    if (!window.isSecureContext) {
+      showWarning(config.ui.insecure);
+      return;
+    }
+    if (!('DeviceOrientationEvent' in window)) {
+      showWarning(config.ui.unsupported);
+      return;
+    }
+
+    connectButton.disabled = true;
+    connectButton.textContent = config.ui.connecting;
+
     try {
-      await connect();
-      setStatus(config.ui.connected, 'ok');
+      // El audio y el permiso del sensor deben pedirse en el mismo toque,
+      // antes de cualquier espera; por eso se lanzan los dos a la vez.
+      const audioReady = unlockAudio();
+
+      // iPhone y iPad piden permiso para usar el sensor.
+      if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+        const answer = await DeviceOrientationEvent.requestPermission();
+        if (answer !== 'granted') {
+          connectButton.disabled = false;
+          connectButton.textContent = config.ui.connect;
+          showWarning(config.ui.denied);
+          return;
+        }
+      }
+
+      await audioReady;
+
+      active = true;
+      gotSensorData = false;
+      candidate = null;
+      window.addEventListener('deviceorientation', handleOrientation);
+      requestWakeLock();
+
+      connectButton.disabled = false;
+      connectButton.textContent = config.ui.stop;
+      setStatus(config.ui.waiting, 'busy');
+
+      // Con el celular en la mano, deja la frase a la vista en la pantalla.
+      phraseDisplay.closest('.bubble').scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      sensorTimer = setTimeout(() => {
+        if (!gotSensorData) {
+          stop();
+          showWarning(config.ui.noSensor);
+        }
+      }, SENSOR_TIMEOUT_MS);
     } catch (error) {
-      device = null;
-      setStatus('', '');
-      resetConnectButton();
+      console.error(error);
+      stop();
       showError(error.message);
     }
   }
 
-  async function onConnectClick() {
-    if (!navigator.bluetooth) {
-      warningBox.hidden = false;
-      connectButton.hidden = true;
-      return;
-    }
-
-    errorBox.hidden = true;
-
-    try {
-      device = await navigator.bluetooth.requestDevice({
-        filters: [{ namePrefix: 'BBC micro:bit' }],
-        optionalServices: [SERVICE_UUID]
-      });
-      device.addEventListener('gattserverdisconnected', handleDisconnect);
-
-      connectButton.disabled = true;
-      connectButton.textContent = config.ui.connecting;
-
-      await connect();
-
-      connectButton.hidden = true;
-      setStatus(config.ui.connected, 'ok');
-    } catch (error) {
-      console.error(error);
-      if (device) device.removeEventListener('gattserverdisconnected', handleDisconnect);
-      device = null;
-      resetConnectButton();
-      // Si la persona cierra la ventana de selección no es un error real.
-      if (error.name !== 'NotFoundError') showError(error.message);
-    }
+  function onConnectClick() {
+    if (active) stop();
+    else start();
   }
+
+  // Al volver a la página, la pantalla se puede volver a apagar: se pide de nuevo.
+  document.addEventListener('visibilitychange', () => {
+    if (active && document.visibilityState === 'visible') requestWakeLock();
+  });
 
   /* ---------- Inicio ---------- */
 
   connectButton.textContent = config.ui.connect;
-  document.getElementById('warning-text').textContent = config.ui.unsupported;
   document.getElementById('error-title').textContent = config.ui.errorTitle;
   document.getElementById('error-hint').textContent = config.ui.errorHint;
   connectButton.addEventListener('click', onConnectClick);
