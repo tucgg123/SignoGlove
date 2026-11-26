@@ -7,9 +7,12 @@
  * Flujo:
  * 1. La persona abre esta página en el celular y toca «Activar sensor».
  * 2. El navegador entrega la orientación del celular (giroscopio y acelerómetro).
- * 3. Con ella se calcula la inclinación lateral (roll), igual que hacía la micro:bit:
+ * 3. Se usa solo un eje del sensor. Por defecto es el eje X (inclinar hacia
+ *    adelante o hacia atrás), igual que la micro:bit:
  *    0° = celular plano con la pantalla hacia arriba,
- *    positivo = se inclina hacia la derecha, ±180° = boca abajo.
+ *    positivo = la parte de arriba del celular sube, ±180° = boca abajo.
+ *    El eje y los rangos se pueden cambiar en la página «Calibrar»
+ *    (ver assets/js/tilt.js).
  * 4. Ese ángulo se convierte en una de las 5 frases del tema elegido,
  *    que se muestra en pantalla y se reproduce en voz alta.
  */
@@ -22,24 +25,11 @@
     return;
   }
 
-  // Rangos de inclinación → posición de la frase (0 a 4).
-  // Se revisan en este orden y gana el primero que coincida,
-  // igual que en la versión original con la micro:bit.
-  const TILT_RANGES = [
-    { min: -25, max: 35, phrase: 0 },
-    { min: 35, max: 75, phrase: 1 },
-    { min: -75, max: -25, phrase: 2 },
-    { min: 115, max: 140, phrase: 3 },
-    { min: 150, max: 180, phrase: 4 }
-  ];
+  const tilt = window.SignoTilt;
 
-  // Cambia a true si en tu montaje el ángulo sale con el signo al revés
-  // (por ejemplo, si al inclinar a la derecha ves valores negativos).
-  const INVERT_DIRECTION = true;
-
-  // Tiempo (ms) que la mano debe quedarse en una posición antes de hablar.
-  // Evita que la frase salte cuando el ángulo está justo en el borde de un rango.
-  const HOLD_MS = 400;
+  // Eje, rangos de cada frase y tiempo de espera: la calibración guardada
+  // en este celular o, si no hay, los valores por defecto (ver tilt.js).
+  const calibration = tilt.load();
 
   // Si en este tiempo (ms) no llega ningún dato, el equipo no tiene sensor.
   const SENSOR_TIMEOUT_MS = 2000;
@@ -130,15 +120,9 @@
     });
   }
 
-  function formatDegrees(value) {
-    // Usa el signo menos tipográfico (−) para que se lea mejor.
-    return String(value).replace('-', '−') + '°';
-  }
-
   function rangeLabel(index) {
-    const range = TILT_RANGES.find((r) => r.phrase === index);
-    if (!range) return '';
-    return formatDegrees(range.min) + ' ' + config.ui.rangeJoin + ' ' + formatDegrees(range.max);
+    const range = calibration.ranges[index];
+    return range ? tilt.rangeLabel(range, config.ui.rangeJoin) : '';
   }
 
   function renderPhrases() {
@@ -179,26 +163,14 @@
 
   /* ---------- Sensor del celular ---------- */
 
-  /**
-   * Calcula la inclinación lateral (roll) a partir de los ángulos que da el
-   * navegador: beta (adelante/atrás, −180 a 180) y gamma (izquierda/derecha,
-   * −90 a 90). Gamma por sí solo no llega a 180°, así que se combinan los dos
-   * para obtener un ángulo de −180 a 180, como el de la micro:bit.
-   */
-  function rollFromOrientation(beta, gamma) {
-    const b = beta * Math.PI / 180;
-    const g = gamma * Math.PI / 180;
-    const roll = Math.atan2(Math.cos(b) * Math.sin(g), Math.cos(b) * Math.cos(g)) * 180 / Math.PI;
-    return INVERT_DIRECTION ? -roll : roll;
-  }
-
   function phraseFromTilt(angle) {
-    const range = TILT_RANGES.find((r) => angle >= r.min && angle <= r.max);
-    return range ? config.topics[currentTopic].phrases[range.phrase] : null;
+    const index = tilt.match(calibration, angle);
+    return index === null ? null : config.topics[currentTopic].phrases[index];
   }
 
   function handleOrientation(event) {
-    if (!active || !Number.isFinite(event.beta) || !Number.isFinite(event.gamma)) return;
+    const reading = active ? tilt.read(event, calibration) : null;
+    if (reading === null) return;
 
     if (!gotSensorData) {
       gotSensorData = true;
@@ -206,11 +178,11 @@
       setStatus(config.ui.connected, 'ok');
     }
 
-    const angle = Math.round(rollFromOrientation(event.beta, event.gamma));
+    const angle = Math.round(reading);
     const now = performance.now();
 
     if (now - lastAngleUpdate > 120) {
-      angleText.textContent = config.ui.angle + ': ' + formatDegrees(angle);
+      angleText.textContent = config.ui.angle + ': ' + tilt.formatDegrees(angle);
       lastAngleUpdate = now;
     }
 
@@ -226,7 +198,7 @@
       return;
     }
     // Solo se habla cuando la frase cambia y la mano se quedó quieta un momento.
-    if (now - candidateSince >= HOLD_MS && (!currentPhrase || phrase.text !== currentPhrase.text)) {
+    if (now - candidateSince >= calibration.holdMs && (!currentPhrase || phrase.text !== currentPhrase.text)) {
       showPhrase(phrase);
     }
   }
@@ -275,14 +247,12 @@
       const audioReady = unlockAudio();
 
       // iPhone y iPad piden permiso para usar el sensor.
-      if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-        const answer = await DeviceOrientationEvent.requestPermission();
-        if (answer !== 'granted') {
-          connectButton.disabled = false;
-          connectButton.textContent = config.ui.connect;
-          showWarning(config.ui.denied);
-          return;
-        }
+      const answer = await tilt.requestPermission();
+      if (answer !== 'granted') {
+        connectButton.disabled = false;
+        connectButton.textContent = config.ui.connect;
+        showWarning(config.ui.denied);
+        return;
       }
 
       await audioReady;
@@ -329,6 +299,7 @@
   document.getElementById('error-title').textContent = config.ui.errorTitle;
   document.getElementById('error-hint').textContent = config.ui.errorHint;
   connectButton.addEventListener('click', onConnectClick);
+  document.getElementById('calibration-note').hidden = !calibration.custom;
   phraseDisplay.textContent = config.ui.placeholder;
   phraseDisplay.classList.add('is-empty');
   renderTopics();

@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Calibrate the sensor | SignoGlove</title>
+  <meta name="description" content="See what your phone’s motion sensor measures in real time and save your own hand positions for SignoGlove.">
+  <link rel="alternate" hreflang="es" href="../es/calibrate.html">
+  <link rel="icon" type="image/png" href="../assets/img/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+  <link rel="stylesheet" href="../assets/css/styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#contenido">Skip to content</a>
+
+  <header class="site-header">
+    <div class="wrap">
+      <a class="brand" href="index.html">
+        <img src="../assets/img/logo.png" alt="" width="40" height="40">
+        SignoGlove
+      </a>
+      <nav class="site-nav" aria-label="Main">
+        <a href="index.html">Home</a>
+        <a href="calibrate.html" aria-current="page">Calibrate</a>
+        <a href="about.html">About</a>
+        <a href="donate.html">Donate</a>
+        <a href="team.html">Team</a>
+        <a class="lang" href="../es/calibrate.html" hreflang="es" lang="es">Español</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="contenido">
+    <section class="page-head">
+      <div class="wrap">
+        <h1>Calibrate the sensor</h1>
+        <p>See what the phone measures in real time and choose hand positions that feel comfortable.</p>
+        <ol class="howto">
+          <li>Place the phone on your hand the way you’ll use it and tap “Start sensor”.</li>
+          <li>For each phrase, put your hand in a comfortable position, hold still and tap “Save position”.</li>
+          <li>Check below that each position says the right phrase, then tap “Use this calibration”.</li>
+        </ol>
+      </div>
+    </section>
+
+    <div class="content calib">
+      <div class="wrap">
+        <section class="block" aria-labelledby="live-title">
+          <h2 id="live-title">What the sensor measures</h2>
+
+          <div class="hero-actions">
+            <button id="connect" class="btn" type="button">Start sensor</button>
+            <p id="status" class="status" role="status" aria-live="polite"></p>
+          </div>
+          <div id="warning" class="alert" role="alert" hidden>
+            <strong id="warning-text"></strong>
+          </div>
+          <div id="error" class="alert alert-error" role="alert" hidden>
+            <strong id="error-title"></strong>
+            <p id="error-hint"></p>
+            <p><code id="error-detail"></code></p>
+          </div>
+
+          <fieldset class="axis-choice">
+            <legend>Axis to use</legend>
+            <label class="axis-option">
+              <input type="radio" name="axis" value="beta">
+              <span><strong>Forward and back (X axis)</strong><small>Like the micro:bit. Goes from −180° to 180°.</small></span>
+            </label>
+            <label class="axis-option">
+              <input type="radio" name="axis" value="gamma">
+              <span><strong>Side to side (Y axis)</strong><small>Goes from −90° to 90°. Unreliable when the phone is nearly upright.</small></span>
+            </label>
+          </fieldset>
+          <label class="axis-option invert-option">
+            <input id="invert" type="checkbox">
+            <span><strong>Invert the direction</strong><small>Positive angles become negative and vice versa. Each phrase triggers with the opposite movement.</small></span>
+          </label>
+
+          <div class="readout">
+            <p class="readout-label">Tilt right now</p>
+            <p id="live-angle" class="readout-value">—</p>
+            <p id="live-phrase" class="readout-phrase" aria-live="polite"></p>
+          </div>
+
+          <div class="gauge" role="img" aria-label="Tilt gauge showing the range of each phrase">
+            <div class="gauge-track">
+              <div id="gauge-bands" class="gauge-bands"></div>
+              <div id="gauge-marker" class="gauge-marker" hidden></div>
+            </div>
+            <div id="gauge-scale" class="gauge-scale"></div>
+          </div>
+
+          <h3 class="calib-subtitle">All three sensor axes</h3>
+          <dl class="axes">
+            <div><dt>Forward and back (beta, X axis)</dt><dd id="value-beta">—</dd></div>
+            <div><dt>Side to side (gamma, Y axis)</dt><dd id="value-gamma">—</dd></div>
+            <div><dt>Compass turn (alpha)</dt><dd id="value-alpha">—</dd></div>
+            <div><dt>Lowest reached</dt><dd id="value-min">—</dd></div>
+            <div><dt>Highest reached</dt><dd id="value-max">—</dd></div>
+          </dl>
+          <p class="note">Move your hand as far as feels comfortable: the lowest and highest values tell you which angles you reach easily.</p>
+          <button id="reset-extremes" class="btn btn-ghost btn-small" type="button">Reset lowest and highest</button>
+        </section>
+
+        <section class="block" aria-labelledby="positions-title">
+          <h2 id="positions-title">Phrase positions</h2>
+          <p class="section-intro">Each phrase triggers near the angle you save. You can also type the angle. The highlighted phrase is the one it would say right now.</p>
+          <p id="gap-warning" class="alert" role="status" hidden></p>
+          <ol id="positions" class="positions"></ol>
+        </section>
+
+        <section class="block" aria-labelledby="settings-title">
+          <h2 id="settings-title">Settings</h2>
+          <div class="sliders">
+            <div class="slider">
+              <label for="tolerance">Margin for each position <output id="tolerance-value" for="tolerance"></output></label>
+              <input id="tolerance" type="range" min="5" max="45" step="1">
+              <p class="note">How far you can move from the saved angle. A bigger margin is easier to hit, but phrases can end up too close together.</p>
+            </div>
+            <div class="slider">
+              <label for="hold">Time before it speaks <output id="hold-value" for="hold"></output></label>
+              <input id="hold" type="range" min="0" max="1500" step="50">
+              <p class="note">How long you need to hold a position before it says the phrase.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="block" aria-labelledby="save-title">
+          <h2 id="save-title">Save</h2>
+          <div class="calib-actions">
+            <button id="save" class="btn" type="button">Use this calibration</button>
+            <button id="restore" class="btn btn-ghost" type="button">Back to the original values</button>
+          </div>
+          <p id="save-status" class="save-status" role="status" aria-live="polite"></p>
+          <p class="note">The calibration is saved only on this phone and this browser. <a href="index.html">Try it in the communicator</a></p>
+
+          <details class="code-box">
+            <summary>Show as code (to make it the default for everyone)</summary>
+            <p class="note">Copy this code and paste it into DEFAULT_CALIBRATION in assets/js/tilt.js. That way, anyone who opens the page uses these values.</p>
+            <pre><code id="code"></code></pre>
+            <button id="copy-code" class="btn btn-ghost btn-small" type="button" data-copy="" data-done="Copied">Copy code</button>
+          </details>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>SignoGlove: powered by your phone’s motion sensor.</p>
+    </div>
+  </footer>
+
+  <script src="../assets/js/main.js"></script>
+  <script src="../assets/js/data/en.js"></script>
+  <script src="../assets/js/tilt.js"></script>
+  <script src="../assets/js/calibrate.js"></script>
+</body>
+</html>

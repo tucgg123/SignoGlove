@@ -23,6 +23,28 @@ window.SIGNOGLOVE = {
     placeholder: 'Start the sensor or tap a phrase to hear it.'
   },
 
+  // Text for the “Calibrate” page (assets/js/calibrate.js).
+  calibrate: {
+    phrase: 'Phrase',
+    example: 'e.g.',
+    angleLabel: 'Angle',
+    capture: 'Save position',
+    measuring: 'Hold still… measuring',
+    captured: 'Position saved:',
+    unsteady: 'You moved too much while measuring. Hold still and try again.',
+    noData: 'No sensor data came in. Start the sensor and try again.',
+    startFirst: 'First tap “Start sensor” (above).',
+    now: 'It would say',
+    none: 'nothing (the last phrase stays)',
+    tooClose: 'Phrases {a} and {b} are very close ({gap}): they’ll be easy to mix up.',
+    missing: 'You changed the axis: save all 5 positions before using the calibration.',
+    saved: 'Done. The communicator now uses this calibration on this phone.',
+    saveFailed: 'Couldn’t save in this browser (private mode?). You can copy the code instead.',
+    restored: 'Back to the original values.',
+    quotes: ['“', '”'],
+    codeComment: 'phrase'
+  },
+
   topics: [
     {
       name: 'Personal relationships',
