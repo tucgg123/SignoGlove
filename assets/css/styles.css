@@ -302,6 +302,7 @@ button { font: inherit; }
 .axis-option:has(input:checked) { border-color: var(--ink); background: var(--yellow-soft); }
 .axis-option input { width: 22px; height: 22px; margin: 2px 0 0; accent-color: var(--red); flex: none; }
 .axis-option small { display: block; font-size: 15px; color: var(--ink-soft); }
+.invert-option { margin-top: 10px; }
 
 .readout { margin-top: 28px; padding: 24px 28px; border-radius: var(--radius-lg); background: var(--ink); color: #FFFFFF; }
 .readout-label { margin: 0; font-size: 16px; color: #D9D4E8; }

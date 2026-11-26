@@ -34,6 +34,7 @@
   const errorBox = $('error');
   const errorDetail = $('error-detail');
   const axisInputs = Array.from(document.querySelectorAll('input[name="axis"]'));
+  const invertInput = $('invert');
   const liveAngle = $('live-angle');
   const livePhrase = $('live-phrase');
   const gaugeBands = $('gauge-bands');
@@ -463,6 +464,7 @@
 
   function syncControls() {
     axisInputs.forEach((input) => { input.checked = input.value === axis; });
+    invertInput.checked = invert;
     toleranceInput.value = tolerance;
     toleranceValue.textContent = '±' + tolerance + '°';
     holdInput.value = holdMs;
@@ -471,6 +473,19 @@
 
   axisInputs.forEach((input) => {
     input.addEventListener('change', () => { if (input.checked) setAxis(input.value); });
+  });
+
+  // Invertir solo cambia el signo de la lectura: los rangos se quedan igual,
+  // así que cada frase pasa a activarse con el movimiento contrario.
+  invertInput.addEventListener('change', () => {
+    invert = invertInput.checked;
+    extremes = { min: null, max: null };
+    saveStatus.textContent = '';
+    renderCode();
+    if (lastValues) {
+      const reading = tilt.read(lastValues, { axis, invert });
+      if (reading !== null) paint(lastValues, reading);
+    }
   });
 
   toleranceInput.addEventListener('input', () => {

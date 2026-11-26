@@ -11,7 +11,7 @@ Página web que usa el **sensor de movimiento del celular** (giroscopio y aceler
 ## Cómo funciona
 
 1. Abres la página en el celular y tocas **Activar sensor** (en iPhone hay que tocar **Permitir**).
-2. La página lee la orientación del celular (`DeviceOrientationEvent`) y usa solo el giro sobre el **eje X** (inclinar hacia adelante o hacia atrás), igual que la micro:bit: **0°** con la pantalla hacia arriba, valores **positivos** cuando sube la parte de arriba del celular y **±180°** boca abajo. Inclinar hacia los lados no cambia nada. El ángulo se ve en vivo debajo del botón.
+2. La página lee la orientación del celular (`DeviceOrientationEvent`) y usa solo el giro sobre el **eje X** (inclinar hacia adelante o hacia atrás), igual que la micro:bit: **0°** con la pantalla hacia arriba, **±180°** boca abajo. El sentido está invertido por defecto: los valores son **positivos** cuando baja la parte de arriba del celular. Inclinar hacia los lados no cambia nada. El ángulo se ve en vivo debajo del botón.
 3. Si la mano se queda unos 0,4 s dentro de un rango, la frase aparece en pantalla y se reproduce su audio.
 
 Valores por defecto (los mismos de la micro:bit):
@@ -31,7 +31,7 @@ Entre rangos (por ejemplo, de 75° a 115°) no cambia nada: se queda la última 
 La página **Calibrar** (`es/calibrate.html`) sirve para ajustar la app a la mano de cada persona:
 
 - Muestra en vivo los tres ejes del sensor (adelante/atrás, a los lados y giro tipo brújula), el mínimo y el máximo que alcanzas, y un medidor con el rango de cada frase.
-- Deja elegir el eje: **adelante y atrás (eje X)**, como la micro:bit, o **a los lados (eje Y)**.
+- Deja elegir el eje: **adelante y atrás (eje X)**, como la micro:bit, o **a los lados (eje Y)**. También tiene **Invertir el sentido**, que cambia el signo de los ángulos (por defecto está invertido).
 - Para cada frase, pones la mano en una posición cómoda y tocas **Guardar posición**: mide durante 1 segundo y guarda el promedio. Si te mueves mucho, pide repetir.
 - Con esas posiciones calcula los rangos (ángulo guardado ± el margen, sin que dos frases se pisen) y resalta en vivo qué frase diría.
 - También se ajustan el margen de cada posición y el tiempo que hay que sostenerla antes de que hable.
