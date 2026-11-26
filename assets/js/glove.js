@@ -35,7 +35,7 @@
 
   // Cambia a true si en tu montaje el ángulo sale con el signo al revés
   // (por ejemplo, si al inclinar a la derecha ves valores negativos).
-  const INVERT_DIRECTION = false;
+  const INVERT_DIRECTION = true;
 
   // Tiempo (ms) que la mano debe quedarse en una posición antes de hablar.
   // Evita que la frase salte cuando el ángulo está justo en el borde de un rango.
