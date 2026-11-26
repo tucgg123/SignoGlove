@@ -23,6 +23,28 @@ window.SIGNOGLOVE = {
     placeholder: 'Activa el sensor o toca una frase para escucharla.'
   },
 
+  // Textos de la página «Calibrar» (assets/js/calibrate.js).
+  calibrate: {
+    phrase: 'Frase',
+    example: 'ej.',
+    angleLabel: 'Ángulo',
+    capture: 'Guardar posición',
+    measuring: 'Quieto… midiendo',
+    captured: 'Posición guardada:',
+    unsteady: 'Te moviste mucho mientras medía. Quédate quieto y vuelve a intentarlo.',
+    noData: 'No llegaron datos del sensor. Actívalo y vuelve a intentarlo.',
+    startFirst: 'Primero toca «Activar sensor» (arriba).',
+    now: 'Ahora diría',
+    none: 'nada (se mantiene la última frase)',
+    tooClose: 'Las frases {a} y {b} están muy cerca ({gap}): será fácil confundirlas.',
+    missing: 'Cambiaste de eje: guarda las 5 posiciones antes de usar la calibración.',
+    saved: 'Listo. El comunicador ya usa esta calibración en este celular.',
+    saveFailed: 'No se pudo guardar en este navegador (¿modo incógnito?). Puedes copiar el código.',
+    restored: 'Se volvió a los valores originales.',
+    quotes: ['«', '»'],
+    codeComment: 'frase'
+  },
+
   topics: [
     {
       name: 'Relaciones personales',

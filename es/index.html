@@ -23,6 +23,7 @@
       </a>
       <nav class="site-nav" aria-label="Principal">
         <a href="index.html" aria-current="page">Inicio</a>
+        <a href="calibrate.html">Calibrar</a>
         <a href="about.html">Sobre el proyecto</a>
         <a href="donate.html">Donaciones</a>
         <a href="team.html">Integrantes</a>
@@ -42,7 +43,8 @@
             <p id="status" class="status" role="status" aria-live="polite"></p>
             <p id="angle" class="angle"></p>
           </div>
-          <p class="note">Abre esta página en el celular (Chrome en Android o Safari en iPhone). Consejo: bloquea la rotación de pantalla para que no cambie al girar la mano.</p>
+          <p class="note">Abre esta página en el celular (Chrome en Android o Safari en iPhone). Consejo: bloquea la rotación de pantalla para que no cambie al girar la mano. ¿Alguna posición es incómoda? <a href="calibrate.html">Calibra el sensor</a>.</p>
+          <p id="calibration-note" class="note" hidden>Estás usando tu propia calibración. <a href="calibrate.html">Cambiarla</a></p>
 
           <div id="warning" class="alert" role="alert" hidden>
             <strong id="warning-text"></strong>
@@ -80,6 +82,7 @@
 
   <script src="../assets/js/main.js"></script>
   <script src="../assets/js/data/es.js"></script>
+  <script src="../assets/js/tilt.js"></script>
   <script src="../assets/js/glove.js"></script>
 </body>
 </html>

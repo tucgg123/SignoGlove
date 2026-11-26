@@ -14,6 +14,8 @@ Página web que usa el **sensor de movimiento del celular** (giroscopio y aceler
 2. La página lee la orientación del celular (`DeviceOrientationEvent`) y usa solo el giro sobre el **eje X** (inclinar hacia adelante o hacia atrás), igual que la micro:bit: **0°** con la pantalla hacia arriba, valores **positivos** cuando sube la parte de arriba del celular y **±180°** boca abajo. Inclinar hacia los lados no cambia nada. El ángulo se ve en vivo debajo del botón.
 3. Si la mano se queda unos 0,4 s dentro de un rango, la frase aparece en pantalla y se reproduce su audio.
 
+Valores por defecto (los mismos de la micro:bit):
+
 | Inclinación recibida | Frase del tema |
 | -------------------- | -------------- |
 | −25 a 35             | 1              |
@@ -24,11 +26,17 @@ Página web que usa el **sensor de movimiento del celular** (giroscopio y aceler
 
 Entre rangos (por ejemplo, de 75° a 115°) no cambia nada: se queda la última frase.
 
-Para ajustar el comportamiento, edita las constantes al inicio de `assets/js/glove.js`:
+## Calibrar el sensor
 
-- `TILT_RANGES`: los rangos de cada frase.
-- `INVERT_DIRECTION`: ponlo en `true` si en tu montaje el ángulo sale al revés.
-- `HOLD_MS`: cuánto tiempo hay que sostener la posición antes de que hable.
+La página **Calibrar** (`es/calibrate.html`) sirve para ajustar la app a la mano de cada persona:
+
+- Muestra en vivo los tres ejes del sensor (adelante/atrás, a los lados y giro tipo brújula), el mínimo y el máximo que alcanzas, y un medidor con el rango de cada frase.
+- Deja elegir el eje: **adelante y atrás (eje X)**, como la micro:bit, o **a los lados (eje Y)**.
+- Para cada frase, pones la mano en una posición cómoda y tocas **Guardar posición**: mide durante 1 segundo y guarda el promedio. Si te mueves mucho, pide repetir.
+- Con esas posiciones calcula los rangos (ángulo guardado ± el margen, sin que dos frases se pisen) y resalta en vivo qué frase diría.
+- También se ajustan el margen de cada posición y el tiempo que hay que sostenerla antes de que hable.
+- **Usar esta calibración** la guarda en ese celular (en el navegador) y el comunicador la usa desde ese momento. **Volver a los valores originales** la borra.
+- **Ver como código** da el texto para pegar en `DEFAULT_CALIBRATION`, en `assets/js/tilt.js`. Así esos valores son los de todas las personas.
 
 Hay 5 temas (relaciones personales, trabajo y estudios, salud y bienestar, toma de decisiones y vida cotidiana), con 25 frases por idioma. Sin el guante, también se pueden tocar las frases para escucharlas.
 
@@ -43,6 +51,7 @@ SignoGlove/
 ├── index.html              # Abre /es o /en según el idioma del navegador
 ├── es/                     # Sitio en español
 │   ├── index.html          # Comunicador (sensor del celular)
+│   ├── calibrate.html      # Calibrar el sensor
 │   ├── about.html          # Sobre el proyecto
 │   ├── donate.html         # Donaciones
 │   └── team.html           # Integrantes
@@ -50,7 +59,9 @@ SignoGlove/
 └── assets/
     ├── css/styles.css      # Estilos compartidos
     ├── js/
-    │   ├── glove.js        # Lógica del guante (compartida)
+    │   ├── glove.js        # Comunicador: lee el sensor y dice las frases
+    │   ├── tilt.js         # Eje, rangos y calibración (valores por defecto)
+    │   ├── calibrate.js    # Página de calibración
     │   ├── main.js         # Utilidades comunes
     │   └── data/
     │       ├── es.js       # Frases y textos en español
